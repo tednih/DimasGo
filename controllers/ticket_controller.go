@@ -2,27 +2,30 @@
 package controllers
 
 import (
-	"DimasGO/models"
+	"DimasGo/config"
+	"DimasGo/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-var tickets []models.Ticket
-
-// Handler untuk endpoint GET /tickets
 func GetTickets(c *gin.Context) {
-	c.JSON(http.StatusOK, tickets)
-}
-
-// Handler untuk endpoint POST /tickets
-func CreateTicket(c *gin.Context) {
-	var newTicket models.Ticket
-	if err := c.ShouldBindJSON(&newTicket); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var tickets []models.Ticket
+	rows, err := config.DB.Query("SELECT * FROM tickets")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	defer rows.Close()
 
-	tickets = append(tickets, newTicket)
-	c.JSON(http.StatusCreated, newTicket)
+	for rows.Next() {
+		var ticket models.Ticket
+		if err := rows.Scan(&ticket.ID, &ticket.Movie, &ticket.Price); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		tickets = append(tickets, ticket)
+	}
+
+	c.JSON(http.StatusOK, tickets)
 }

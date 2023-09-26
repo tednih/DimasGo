@@ -2,20 +2,17 @@
 package main
 
 import (
-	"DimasGO/controllers"
-
-	"github.com/gin-gonic/gin"
+	"DimasGo/config"
+	"DimasGo/routes"
 )
 
 func main() {
-	r := gin.Default()
+	// Inisialisasi koneksi database
+	config.InitDB()
 
-	// Group routes under /tickets
-	ticketGroup := r.Group("/tickets")
-	{
-		ticketGroup.GET("/", controllers.GetTickets)
-		ticketGroup.POST("/", controllers.CreateTicket)
-	}
+	// Setup router
+	r := routes.SetupRouter()
 
+	// Run server
 	r.Run(":8080")
 }
