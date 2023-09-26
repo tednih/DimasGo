@@ -2,8 +2,7 @@
 package models
 
 type Ticket struct {
-	ID      int    `json:"id"`
-	Match   string `json:"match"`
-	Price   int    `json:"price"`
-	Tickets int    `json:"tickets"`
+	ID    int    `json:"id"`
+	Movie string `json:"movie"`
+	Price int    `json:"price"`
 }
