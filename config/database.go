@@ -12,7 +12,12 @@ import (
 var DB *sql.DB
 
 func InitDB() {
-	dataSourceName := "root:@tcp(localhost:3306)/db_ticketprakerja"
+	dataSourceName := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v"),
+						os.Getenv("DB_USER"),
+						os.Getenv("DB_PASSWORD"),
+						os.Getenv("DB_HOST"),
+						os.Getenv("DB_PORT"),
+						os.Getenv("DB_NAME"),
 	var err error
 	DB, err = sql.Open("mysql", dataSourceName)
 	if err != nil {
