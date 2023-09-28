@@ -1,18 +1,21 @@
-// main.go
 package main
 
 import (
 	"DimasGo/config"
 	"DimasGo/routes"
+	"log"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	// Inisialisasi koneksi database
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
 	config.InitDB()
 
-	// Setup router
 	r := routes.SetupRouter()
 
-	// Run server
 	r.Run(":8080")
 }

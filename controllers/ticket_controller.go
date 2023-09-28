@@ -13,9 +13,18 @@ import (
 func CreateTicket(c *gin.Context) {
 	var newTicket models.Ticket
 
-	// Bind data JSON yang dikirim dalam permintaan ke struct newTicket
 	if err := c.ShouldBindJSON(&newTicket); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	_, err := config.DB.Exec("INSERT INTO tickets (movie, price) VALUES (?, ?)", newTicket.Movie, newTicket.Price)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, newTicket)
+}
 
 func GetTickets(c *gin.Context) {
 	var tickets []models.Ticket
@@ -26,14 +35,6 @@ func GetTickets(c *gin.Context) {
 	}
 	defer rows.Close()
 
-	// Simpan tiket baru ke dalam database
-	_, err := config.DB.Exec("INSERT INTO tickets (movie, price) VALUES (?, ?)", newTicket.Movie, newTicket.Price)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusCreated, newTicket)
 	for rows.Next() {
 		var ticket models.Ticket
 		if err := rows.Scan(&ticket.ID, &ticket.Movie, &ticket.Price); err != nil {
@@ -47,17 +48,14 @@ func GetTickets(c *gin.Context) {
 }
 
 func GetTicketByID(c *gin.Context) {
-	// Ambil ID tiket dari URL parameter
 	idParam := c.Param("id")
 
-	// Konversi ID dari string ke int
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ticket ID"})
 		return
 	}
 
-	// Query database untuk mendapatkan tiket berdasarkan ID
 	var ticket models.Ticket
 	err = config.DB.QueryRow("SELECT * FROM tickets WHERE id=?", id).Scan(&ticket.ID, &ticket.Movie, &ticket.Price)
 	if err != nil {
@@ -69,24 +67,21 @@ func GetTicketByID(c *gin.Context) {
 }
 
 func UpdateTicket(c *gin.Context) {
-	// Ambil ID tiket dari URL parameter
+
 	idParam := c.Param("id")
 
-	// Konversi ID dari string ke int
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ticket ID"})
 		return
 	}
 
-	// Bind data JSON yang dikirim dalam permintaan ke struct ticket
 	var updatedTicket models.Ticket
 	if err := c.ShouldBindJSON(&updatedTicket); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Update tiket dalam database
 	_, err = config.DB.Exec("UPDATE tickets SET movie=?, price=? WHERE id=?", updatedTicket.Movie, updatedTicket.Price, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -97,17 +92,14 @@ func UpdateTicket(c *gin.Context) {
 }
 
 func DeleteTicket(c *gin.Context) {
-	// Ambil ID tiket dari URL parameter
 	idParam := c.Param("id")
 
-	// Konversi ID dari string ke int
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ticket ID"})
 		return
 	}
 
-	// Hapus tiket dari database berdasarkan ID
 	_, err = config.DB.Exec("DELETE FROM tickets WHERE id=?", id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
