@@ -4,6 +4,7 @@ import (
 	"DimasGo/config"
 	"DimasGo/routes"
 	"log"
+	"os"
 
 	"github.com/joho/godotenv"
 )
@@ -17,5 +18,5 @@ func main() {
 
 	r := routes.SetupRouter()
 
-	r.Run(":8080")
+	r.Run(":" + os.Getenv("PORT"))
 }
