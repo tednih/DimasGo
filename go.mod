@@ -1,4 +1,4 @@
-module main
+module DimasGo
 
 go 1.20
 
